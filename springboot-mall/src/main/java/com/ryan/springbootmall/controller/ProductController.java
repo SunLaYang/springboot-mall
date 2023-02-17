@@ -56,4 +56,14 @@ public class ProductController {
         Product updateProduct = productService.getProductById(productId);
         return ResponseEntity.status(HttpStatus.OK).body(updateProduct);
     }
+
+    //========================刪除商品==================
+    @DeleteMapping("/products/{productId}")
+    public ResponseEntity<?> deleteProdect(@PathVariable Integer productId){
+        productService.deleteProductById(productId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
+    }
+
 }
