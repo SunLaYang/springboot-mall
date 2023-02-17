@@ -1,17 +1,18 @@
 package com.ryan.springbootmall.model;
 
+import com.ryan.springbootmall.constant.ProductCategory;
+
 import java.util.Date;
 
 public class Product {
 
     private Integer productId;
-    private String productNmae;
-    private String category;
+    private String productName;
+    private ProductCategory category;
     private String imageUrl;
     private Integer price;
     private Integer stock;
     private String description;
-
     private  Date createdDate;
     private Date lastModifiedDate;
 
@@ -23,19 +24,19 @@ public class Product {
         this.productId = productId;
     }
 
-    public String getProductNmae() {
-        return productNmae;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setProductNmae(String productNmae) {
-        this.productNmae = productNmae;
+    public void setProductName(String productNmae) {
+        this.productName = productNmae;
     }
 
-    public String getCategory() {
+    public ProductCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(ProductCategory category) {
         this.category = category;
     }
 
