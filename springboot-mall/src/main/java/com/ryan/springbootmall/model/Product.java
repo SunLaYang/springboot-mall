@@ -28,8 +28,8 @@ public class Product {
         return productName;
     }
 
-    public void setProductName(String productNmae) {
-        this.productName = productNmae;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
     public ProductCategory getCategory() {
