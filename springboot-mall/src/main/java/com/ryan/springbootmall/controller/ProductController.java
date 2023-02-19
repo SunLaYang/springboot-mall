@@ -5,6 +5,7 @@ import com.ryan.springbootmall.dto.ProductQueryParams;
 import com.ryan.springbootmall.dto.ProductRequest;
 import com.ryan.springbootmall.model.Product;
 import com.ryan.springbootmall.service.ProductService;
+import com.ryan.springbootmall.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +26,12 @@ public class ProductController {
 
     //=================查詢全部商品列表==================
     @GetMapping("/products")                        //查詢分類的商品   (required = false)代表category參數為可選
-    public ResponseEntity<List<Product>> getProducts(@RequestParam(required = false) ProductCategory category,
-                                                     @RequestParam(required = false) String search,
-                                                     @RequestParam(defaultValue = "created_date") String orderBy,
-                                                     @RequestParam(defaultValue = "desc") String sort,
-                                                     @RequestParam(defaultValue = "5") @Max(1000) @Min(0) Integer limit,
-                                                     @RequestParam(defaultValue = "0") @Min(0) Integer offset){
+    public ResponseEntity<Page<Product>> getProducts(@RequestParam(required = false) ProductCategory category,
+                                            @RequestParam(required = false) String search,
+                                            @RequestParam(defaultValue = "created_date") String orderBy,
+                                            @RequestParam(defaultValue = "desc") String sort,
+                                            @RequestParam(defaultValue = "5") @Max(1000) @Min(0) Integer limit,
+                                            @RequestParam(defaultValue = "0") @Min(0) Integer offset){
         //修改查詢方法
         ProductQueryParams productQueryParams = new ProductQueryParams();
         productQueryParams.setCategory(category);
@@ -40,9 +41,21 @@ public class ProductController {
         productQueryParams.setLimit(limit);
         productQueryParams.setOffset(offset);
 
+        //取得productList 表示取得商品表的數據
         List<Product> productList = productService.getProducts(productQueryParams);
 
-        return ResponseEntity.status(HttpStatus.OK).body(productList);
+
+        //根據傳進去的參數去確認商品總數有多少筆
+        Integer total = productService.countProduct(productQueryParams);
+
+        //分頁
+        Page<Product> page = new Page<>();
+        page.setLimit(limit);
+        page.setOffset(offset);
+        page.setTotal(total);
+        page.setResults(productList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(page);
 
     }
 
