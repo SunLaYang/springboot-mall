@@ -1,5 +1,6 @@
 package com.ryan.springbootmall.dao;
 
+import com.ryan.springbootmall.constant.ProductCategory;
 import com.ryan.springbootmall.dto.ProductRequest;
 import com.ryan.springbootmall.model.Product;
 import com.ryan.springbootmall.rowmapper.ProductRowMapper;
@@ -25,10 +26,23 @@ public class ProductDaoImpl implements  ProductDao{
     //==================
 
     @Override
-    public List<Product> getProducts() {
-        String sql = "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date From product";
+    public List<Product> getProducts(ProductCategory category, String search) {
+        String sql = "SELECT product_id, product_name, category, image_url, price, stock, description, created_date, last_modified_date From product WHERE 1=1";
+        //WHERE 1 = 1 就跟廢話一樣對查詢結果沒引響，主要是為了讓下面的查詢條件能自由拼接 WHERE 1 = 1 AND category = :category
+        // !!!!!!!!!!一定要在AND前面留一個空白鍵!!!!!!!!!!!!!!!!!
 
         Map<String, Object> map = new HashMap<>();
+
+        if(category != null){
+            sql = sql + " AND category = :category";
+            map.put("category", category.name());//使用enum要調用name方法 才能把enum轉成字串加進去
+
+        }
+
+        if(search != null) {
+            sql = sql + " AND product_name LIKE :search";
+            map.put("search", "%" + search + "%");
+        }
 
         List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
 

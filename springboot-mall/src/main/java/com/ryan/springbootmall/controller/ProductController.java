@@ -1,5 +1,6 @@
 package com.ryan.springbootmall.controller;
 
+import com.ryan.springbootmall.constant.ProductCategory;
 import com.ryan.springbootmall.dto.ProductRequest;
 import com.ryan.springbootmall.model.Product;
 import com.ryan.springbootmall.service.ProductService;
@@ -17,11 +18,13 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    //查詢全部商品列表
-    @GetMapping("/products")
-    public ResponseEntity<List<Product>> getProducts(){
+    //=================查詢全部商品列表==================
+    @GetMapping("/products")                        //查詢分類的商品   (required = false)代表category參數為可選
+    public ResponseEntity<List<Product>> getProducts(@RequestParam(required = false) ProductCategory category,
+                                                     @RequestParam(required = false) String search){
 
-        List<Product> productList = productService.getProducts();
+        List<Product> productList = productService.getProducts(category, search);
+
         return ResponseEntity.status(HttpStatus.OK).body(productList);
 
     }
