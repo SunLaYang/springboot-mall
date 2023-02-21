@@ -1,5 +1,6 @@
 package com.ryan.springbootmall.controller;
 
+import com.ryan.springbootmall.dto.UserLoginRequest;
 import com.ryan.springbootmall.dto.UserRegisterRequest;
 import com.ryan.springbootmall.model.User;
 import com.ryan.springbootmall.service.UserService;
@@ -26,7 +27,13 @@ public class UserController {
        User user = userService.getUserById(userId);
 
        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
 
+    //登入功能
+    @PostMapping("/users/login")//因為密碼比較隱密 所以用post
+    public ResponseEntity<User> login(@RequestBody @Valid UserLoginRequest userLoginRequest){
+        User user = userService.login(userLoginRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
 }

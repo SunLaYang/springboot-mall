@@ -1,6 +1,7 @@
 package com.ryan.springbootmall.service;
 
 import com.ryan.springbootmall.dao.UserDao;
+import com.ryan.springbootmall.dto.UserLoginRequest;
 import com.ryan.springbootmall.dto.UserRegisterRequest;
 import com.ryan.springbootmall.model.User;
 import org.slf4j.Logger;
@@ -39,5 +40,24 @@ public class UserServiceImpl implements UserService{
         }
 
         return userDao.createUser(userRegisterRequest);
+    }
+
+    //檢查mail 跟 密碼是否一致
+    @Override
+    public User login(UserLoginRequest userLoginRequest) {
+        User user = userDao.getUserByEmail(userLoginRequest.getEmail());//根據前端傳進來的mail查詢那筆數據出來
+
+        if(user == null){
+            log.warn("該 email {} 還未註冊", userLoginRequest.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        //如果傳進來的密碼跟資料庫比對一樣  比較字串一定要用equals
+        if(user.getPassword().equals(userLoginRequest.getPassword())){
+            return user;
+        }else{
+            log.warn("mail {} 的密碼不正確", userLoginRequest.getEmail() );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
     }
 }
