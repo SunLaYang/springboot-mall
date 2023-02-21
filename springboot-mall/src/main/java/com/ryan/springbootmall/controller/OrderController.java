@@ -1,6 +1,7 @@
 package com.ryan.springbootmall.controller;
 
 import com.ryan.springbootmall.dto.CreateOrderRequset;
+import com.ryan.springbootmall.model.Order;
 import com.ryan.springbootmall.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,10 @@ public class OrderController {
                                          @RequestBody @Valid CreateOrderRequset createOrderRequset){
 
      Integer orderId = orderService.createOrder(userId, createOrderRequset);
-     return ResponseEntity.status(HttpStatus.CREATED).body(orderId);
+
+     //同時根據訂單ID取得訂單的詳細資訊
+     Order order = orderService.getOrderById(orderId);
+
+     return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 }
