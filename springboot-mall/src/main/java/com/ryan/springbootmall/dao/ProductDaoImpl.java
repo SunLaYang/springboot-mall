@@ -145,6 +145,21 @@ public class ProductDaoImpl implements  ProductDao{
 
     }
 
+    //更新庫存
+    @Override
+    public void updateStock(Integer productId, Integer stock) {
+        //把庫存更新到指定的值，也順便更新最後修改的時間，因為有修改庫存的動作，最後修改時間也應該要更動
+        String sql = "UPDATE product SET stock = :stock, last_modified_date = :lastModifiedDate  WHERE product_id = :productId";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("productId", productId);
+        map.put("stock", stock);
+        map.put("lastModifiedDate", new Date());
+
+        namedParameterJdbcTemplate.update(sql, map);
+
+    }
+
     @Override
     public void deleteProductById(Integer productId) {
         String sql = "DELETE FROM product WHERE product_id = :productId";
