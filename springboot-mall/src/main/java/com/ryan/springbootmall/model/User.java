@@ -1,10 +1,15 @@
 package com.ryan.springbootmall.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 public class User {
     private Integer userId;
+    @JsonProperty("e_mail")
     private String email;
+    @JsonIgnore //傳進來轉換為json就會忽略password的變數 不會回傳給前端
     private String password;
     private Date createdDate;
     private Date lastModifiedDate;
