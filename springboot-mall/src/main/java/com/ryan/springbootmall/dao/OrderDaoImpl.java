@@ -1,5 +1,6 @@
 package com.ryan.springbootmall.dao;
 
+import com.ryan.springbootmall.dto.OrderQueryPararms;
 import com.ryan.springbootmall.model.Order;
 import com.ryan.springbootmall.model.OrderItem;
 import com.ryan.springbootmall.rowmapper.OrderItemRowMapper;
@@ -17,9 +18,41 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class OrderDaoImpl implements OrderDao{
+public class OrderDaoImpl implements OrderDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    @Override
+    public Integer countOrder(OrderQueryPararms orderQueryPararms) {
+        String sql = "SELECT count(*) FROM `order` WHERE 1=1";
+        Map<String, Object> map = new HashMap<>();
+
+        sql = addFilteringSql(sql, map, orderQueryPararms);
+
+        Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+        return total;
+    }
+
+    @Override
+    public List<Order> getOrders(OrderQueryPararms orderQueryPararms) {
+        String sql = "SELECT order_id, user_id, total_amount, created_date, last_modified_date FROM `order` WHERE 1=1";
+        Map<String, Object> map = new HashMap<>();
+        //查詢條件
+        sql = addFilteringSql(sql, map, orderQueryPararms);
+
+        //排序
+        sql = sql + " ORDER BY created_date DESC"; //不希望前端有能力改變排序，所以直接寫死
+
+        //分頁
+        sql = sql + " Limit :limit OFFSET :offset";
+        map.put("limit", orderQueryPararms.getLimit());
+        map.put("offset", orderQueryPararms.getOffset());
+
+        List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderRowMapper());
+
+        return orderList;
+    }
 
     @Override
     public Order getOrderById(Integer orderId) {
@@ -29,9 +62,9 @@ public class OrderDaoImpl implements OrderDao{
 
         List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderRowMapper());
 
-        if(orderList.size() > 0){
+        if (orderList.size() > 0) {
             return orderList.get(0);
-        }else{
+        } else {
 
             return null;
         }
@@ -41,12 +74,12 @@ public class OrderDaoImpl implements OrderDao{
     @Override
     public List<OrderItem> getOrderItemsByOrderId(Integer orderId) {
         String sql = "SELECT oi.order_item_id, oi.order_id, oi.product_id, oi.quantity, oi.amount, p.product_name, p.image_url " +
-       "FROM order_item as oi JOIN product as p ON oi.product_id = p.product_id WHERE oi.order_id = :orderId";
+                "FROM order_item as oi JOIN product as p ON oi.product_id = p.product_id WHERE oi.order_id = :orderId";
 
         Map<String, Object> map = new HashMap<>();
         map.put("orderId", orderId);
 
-        List<OrderItem> orderItemList = namedParameterJdbcTemplate.query(sql,map, new OrderItemRowMapper());
+        List<OrderItem> orderItemList = namedParameterJdbcTemplate.query(sql, map, new OrderItemRowMapper());
 
         return orderItemList;
     }
@@ -90,18 +123,27 @@ public class OrderDaoImpl implements OrderDao{
 
         String sql = "INSERT INTO order_item(order_id, product_id, quantity, amount) " +
                 "VALUES (:orderId, :productId, :quantity, :amount)";
-           MapSqlParameterSource[] parameterSources = new MapSqlParameterSource[orderItemList.size()];
+        MapSqlParameterSource[] parameterSources = new MapSqlParameterSource[orderItemList.size()];
 
-           for(int i = 0 ; i < orderItemList.size(); i++){
-               OrderItem orderItem = orderItemList.get(i);
+        for (int i = 0; i < orderItemList.size(); i++) {
+            OrderItem orderItem = orderItemList.get(i);
 
-               parameterSources[i] = new MapSqlParameterSource();
-               parameterSources[i].addValue("orderId", orderId);
-               parameterSources[i].addValue("productId", orderItem.getProductId());
-               parameterSources[i].addValue("quantity", orderItem.getQuantity());
-               parameterSources[i].addValue("amount", orderItem.getAmount());
-           }
+            parameterSources[i] = new MapSqlParameterSource();
+            parameterSources[i].addValue("orderId", orderId);
+            parameterSources[i].addValue("productId", orderItem.getProductId());
+            parameterSources[i].addValue("quantity", orderItem.getQuantity());
+            parameterSources[i].addValue("amount", orderItem.getAmount());
+        }
 
-           namedParameterJdbcTemplate.batchUpdate(sql, parameterSources);
+        namedParameterJdbcTemplate.batchUpdate(sql, parameterSources);
     }
+
+    private String addFilteringSql(String sql, Map<String, Object> map, OrderQueryPararms orderQueryPararms) {
+        if (orderQueryPararms.getUserId() != null) {
+            sql = sql + " AND user_id = :userId";
+            map.put("userId", orderQueryPararms.getUserId());
+        }
+            return sql;
+    }
+
 }
